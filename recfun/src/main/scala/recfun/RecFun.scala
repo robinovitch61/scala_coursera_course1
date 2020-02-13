@@ -37,5 +37,12 @@ object RecFun extends RecFunInterface {
   /**
    * Exercise 3
    */
-  def countChange(money: Int, coins: List[Int]): Int = 0
+  def countChange(money: Int, coins: List[Int]): Int = {
+    if (money == 0) 1 // 1 way to give change for no money, kind of weird intuitively
+    else if (money < 0 || coins.isEmpty) 0 // this path of coins exceeded the required change
+    else (
+      countChange(money, coins.tail) // can I eliminate this coin option and still make change?
+      + countChange(money - coins.head, coins) // can I make change by using this coin?
+    )
+  }
 }
