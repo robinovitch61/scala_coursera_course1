@@ -71,7 +71,70 @@ class FunSetSuite {
     }
   }
 
+  @Test def `intersect test`: Unit = {
+    new TestSets {
+      val s = intersect(s1, s1)
+      val t = intersect(s1, s2)
+      assert(contains(s, 1), "Intersection 1")
+      assert(!contains(t, 1), "Intersection 2")
 
+      val u = union(s1, s2)
+      val v = intersect(s1, u)
+      assert(contains(v, 1), "Intersect 1")
+      assert(!contains(v, 2), "Intersect 2")
+    }
+  }
+
+  @Test def `diff test`: Unit = {
+    new TestSets {
+      val s = diff(s1, s1)
+      val t = diff(s1, union(s2, s3))
+      assert(!contains(s, 1), "Diff 1")
+      assert(contains(t, 1), "Diff 2")
+    }
+  }
+
+  @Test def `filter test`: Unit = {
+    new TestSets {
+      val s = filter(s1, s1)
+      val t = filter(s1, union(s2, s3))
+      assert(contains(s, 1), "Filter 1")
+      assert(!contains(t, 1), "Filter 2")
+
+      val set = union(s1, s2)
+      val v = filter(set, x => x == 1)
+      assert(contains(v, 1), "filter 1")
+      assert(!contains(v, 2), "filter 2")
+      assert(!contains(v, 1000), "filter 3")
+    }
+  }
+
+  @Test def `forall test`: Unit = {
+    new TestSets {
+      assert(forall(s1, x => true)) // should be true no matter the set
+      assert(forall(s1, x => x == 1))
+      assert(!forall(union(s1, s2), x => x == 1))
+    }
+  }
+
+  @Test def `exists test`: Unit = {
+    new TestSets {
+      assert(exists(union(s1, s2), x => x == 1))
+      assert(!exists(union(s1, s2), x => x == 3))
+    }
+  }
+
+  @Test def `map test`: Unit = {
+    new TestSets {
+      val set = union(union(s1, s2), s3)
+      val s = map(set, x => x * x)
+      assert(s(1))
+      assert(s(4))
+      assert(s(9))
+      assert(!s(10))
+      assert(!s(-1))
+    }
+  }
 
   @Rule def individualTestTimeout = new org.junit.rules.Timeout(10 * 1000)
 }
