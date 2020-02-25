@@ -42,20 +42,18 @@ abstract class TweetSet extends TweetSetInterface {
    * and be implemented in the subclasses?
    */
   def filter(p: Tweet => Boolean): TweetSet = {
-    filterAcc(p, this)
+    filterAcc(p, new Empty())
   }
 
   /**
    * This is a helper method for `filter` that propagates the accumulated tweets.
    */
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
-
-  }
+  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet
 
   /**
    * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
   def union(that: TweetSet): TweetSet = ???
@@ -66,7 +64,7 @@ abstract class TweetSet extends TweetSetInterface {
    * Calling `mostRetweeted` on an empty set should throw an exception of
    * type `java.util.NoSuchElementException`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
   def mostRetweeted: Tweet = ???
@@ -77,7 +75,7 @@ abstract class TweetSet extends TweetSetInterface {
    * have the highest retweet count.
    *
    * Hint: the method `remove` on TweetSet will be very useful.
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
   def descendingByRetweet: TweetList = ???
@@ -111,7 +109,8 @@ abstract class TweetSet extends TweetSetInterface {
 }
 
 class Empty extends TweetSet {
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
+
+  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
 
   /**
    * The following methods are already implemented
@@ -128,17 +127,49 @@ class Empty extends TweetSet {
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
-
+  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
+    val rightTweets = right.filterAcc(p, acc)
+    val childTweets = left.filterAcc(p, rightTweets)
+    if (p(elem)) childTweets incl elem else childTweets
+  }
+  /* this: NonEmpty
+    3
+  1   5
+        2
+  this.filter(x => x < 4)
+  filter:
+    filterAcc(x => x < 4, new Empty())
+  filterAcc:
+    elem = 3
+    rightTweets = 5.filterAcc(x => x < 4, Empty)
+        elem = 5
+        rightTweets = 2.filterAcc(x => x < 4, Empty)
+            elem = 2
+            rightTweets = Empty.filterAcc(x => x < 4, Empty) = Empty
+            childTweets = Empty.filterAcc(x => x < 4, Empty) = Empty
+            p(2) == true, return Empty incl 2 = [2]
+        rightTweets = [2]
+        childTweets = Empty.filterAcc(x => x < 4, [2]) = [2]
+        p(5) == false, return [2]
+    rightTweets = [2]
+    childTweets = 1.filterAcc(x => x < 4, [2])
+        elem = 1
+        rightTweets = Empty.filterAcc(x => x < 4, [2]) = [2]
+        childTweets = Empty.filterAcc(x => x < 4, [2]) = [2]
+        p(1) == true, return [2] incl 1 = [1, 2]
+    childTweets = [1, 2]
+    p(3) == true, return [1, 2] incl 3 = [1, 2, 3] <---- returned TweetSet
+  */
 
   /**
    * The following methods are already implemented
    */
 
-  def contains(x: Tweet): Boolean =
+  def contains(x: Tweet): Boolean = {
     if (x.text < elem.text) left.contains(x)
     else if (elem.text < x.text) right.contains(x)
     else true
+  }
 
   def incl(x: Tweet): TweetSet = {
     if (x.text < elem.text) new NonEmpty(elem, left.incl(x), right)
@@ -146,10 +177,11 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     else this
   }
 
-  def remove(tw: Tweet): TweetSet =
+  def remove(tw: Tweet): TweetSet = {
     if (tw.text < elem.text) new NonEmpty(elem, left.remove(tw), right)
     else if (elem.text < tw.text) new NonEmpty(elem, left, right.remove(tw))
     else left.union(right)
+  }
 
   def foreach(f: Tweet => Unit): Unit = {
     f(elem)
