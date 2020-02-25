@@ -56,7 +56,7 @@ abstract class TweetSet extends TweetSetInterface {
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def union(that: TweetSet): TweetSet = ???
+  def union(that: TweetSet): TweetSet
 
   /**
    * Returns the tweet from this set which has the greatest retweet count.
@@ -67,7 +67,7 @@ abstract class TweetSet extends TweetSetInterface {
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
@@ -111,6 +111,10 @@ abstract class TweetSet extends TweetSetInterface {
 class Empty extends TweetSet {
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
+
+  def union(that: TweetSet): TweetSet = that
+
+  def mostRetweeted: Nothing = throw new java.util.NoSuchElementException("mostRetweeted called on Empty")
 
   /**
    * The following methods are already implemented
@@ -160,6 +164,31 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     childTweets = [1, 2]
     p(3) == true, return [1, 2] incl 3 = [1, 2, 3] <---- returned TweetSet
   */
+
+  def union(that: TweetSet): TweetSet = {
+    left.union(right.union(that incl elem))
+  }
+  /*
+  this: 3
+      2   1
+  that:  4
+           6
+  2.union(1.union(that.incl(3)))
+  incl:
+      that.incl(3) = 4
+                   3   6
+  1.union([3, 4, 6])
+      this = 1
+      that = [3, 4, 6]
+      Empty.union(Empty.union([3, 4, 6] incl 1)) = Empty.union([1, 3, 4, 6]) = [1, 3, 4, 6]
+  2.union([1, 3, 4, 6])
+      this = 2
+      ... = [1, 2, 3, 4, 6]
+  */
+
+  def mostRetweeted: Tweet = {
+    ???
+  }
 
   /**
    * The following methods are already implemented

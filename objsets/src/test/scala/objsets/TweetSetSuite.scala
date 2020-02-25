@@ -38,20 +38,26 @@ class TweetSetSuite {
       assertEquals(2, size(set5.filter(tw => tw.retweets == 20)))
     }
 
-//  @Test def `union: set4c and set4d`: Unit =
-//    new TestSets {
-//      assertEquals(4, size(set4c.union(set4d)))
-//    }
+  @Test def `union: set4c and set4d`: Unit =
+    new TestSets {
+      assertEquals(4, size(set4c.union(set4d)))
+    }
 //
-//  @Test def `union: with empty set1`: Unit =
-//    new TestSets {
-//      assertEquals(4, size(set5.union(set1)))
-//    }
-//
-//  @Test def `union: with empty set2`: Unit =
-//    new TestSets {
-//      assertEquals(4, size(set1.union(set5)))
-//    }
+  @Test def `union: with empty set1`: Unit =
+    new TestSets {
+      assertEquals(4, size(set5.union(set1)))
+    }
+
+  @Test def `union: with empty set2`: Unit =
+    new TestSets {
+      assertEquals(4, size(set1.union(set5)))
+    }
+
+  @Test def `mostRetweeted test`: Unit =
+    new TestSets {
+      val maxTweet = new Tweet("e", "e body", 999)
+      assertEquals(maxTweet, set5.union(new Empty incl maxTweet))
+    }
 //
 //  @Test def `descending: set5`: Unit =
 //    new TestSets {
