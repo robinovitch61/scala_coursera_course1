@@ -78,7 +78,7 @@ abstract class TweetSet extends TweetSetInterface {
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList
 
   /**
    * The following methods are already implemented
@@ -115,6 +115,8 @@ class Empty extends TweetSet {
   def union(that: TweetSet): TweetSet = that
 
   def mostRetweeted: Nothing = throw new java.util.NoSuchElementException("mostRetweeted called on Empty")
+
+  def descendingByRetweet: TweetList = Nil
 
   /**
    * The following methods are already implemented
@@ -187,7 +189,15 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   */
 
   def mostRetweeted: Tweet = {
-    ???
+    this.filter(tweet => tweet.retweets > this.elem.retweets) match {
+      case ne: NonEmpty => ne.mostRetweeted
+      case e: Empty => elem
+    }
+  }
+
+  def descendingByRetweet: TweetList = {
+    val maxTweet = mostRetweeted
+    new Cons(mostRetweeted, this.remove(maxTweet).descendingByRetweet)
   }
 
   /**
@@ -245,14 +255,20 @@ object GoogleVsApple {
   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
-  lazy val googleTweets: TweetSet = ???
-  lazy val appleTweets: TweetSet = ???
+  def getTweetsIncludingKws(kws: List[String]): TweetSet = {
+    TweetReader.allTweets.filter(
+      tweet => kws.exists(kw => tweet.text.split(" ").contains(kw))
+    )
+  }
+
+  lazy val googleTweets: TweetSet = getTweetsIncludingKws(google)
+  lazy val appleTweets: TweetSet = getTweetsIncludingKws(apple)
 
   /**
    * A list of all tweets mentioning a keyword from either apple or google,
    * sorted by the number of retweets.
    */
-  lazy val trending: TweetList = ???
+  lazy val trending: TweetList = googleTweets.union(appleTweets).descendingByRetweet
 }
 
 object Main extends App {

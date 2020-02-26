@@ -56,15 +56,15 @@ class TweetSetSuite {
   @Test def `mostRetweeted test`: Unit =
     new TestSets {
       val maxTweet = new Tweet("e", "e body", 999)
-      assertEquals(maxTweet, set5.union(new Empty incl maxTweet))
+      assertEquals(maxTweet, set5.union(new Empty incl maxTweet).mostRetweeted)
     }
-//
-//  @Test def `descending: set5`: Unit =
-//    new TestSets {
-//      val trends = set5.descendingByRetweet
-//      assert(!trends.isEmpty)
-//      assert(trends.head.user == "a" || trends.head.user == "b")
-//    }
+
+  @Test def `descending: set5`: Unit =
+    new TestSets {
+      val trends = set5.descendingByRetweet
+      assert(!trends.isEmpty)
+      assert(trends.head.user == "a" || trends.head.user == "b")
+    }
 
 
   @Rule def individualTestTimeout = new org.junit.rules.Timeout(10 * 1000)
